@@ -4,9 +4,12 @@ const User = require("../models/User");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+var fetchuser = require('./middleware/fetchuser');
+
+
 const JWT_SECRET = 'appleorange$oy';
 
-// create a User: POST"/api/auth/createuser". No login required
+//Route 1. create a User: POST"/api/auth/createuser". No login required
 router.post("/createuser",
   [
     body("name",'Enter valid name').isLength({ min: 3 }),
@@ -51,12 +54,12 @@ router.post("/createuser",
 
   });
 
-  //Authenticate a user using: POST "api/auth/login". No login required
+  //Route 2. Authenticate a user using: POST "api/auth/login". No login required
   router.post("/login",
   [
     body("email",'Enter valid email').isEmail(),
     body("password",'Password cannot be blank').exists(),
-    ], async(req, res) => {
+    ], async(req, res) => { 
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -84,4 +87,16 @@ router.post("/createuser",
       res.status(500).send("Internal server Error");
     }
   })
+
+  //Route 3. // GET loggedin User Details using : POST "api/auth/getuser". Login required
+  router.post("/getuser",fetchuser, async(req, res) => { 
+  try {
+    userId = req.user.id;
+    const user = await User.findById(userId).select("-password");
+    res.send(user);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send("Internal server Error");
+  } 
+    })
 module.exports = router;
