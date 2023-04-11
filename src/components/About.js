@@ -1,6 +1,6 @@
 import React from 'react'
 
-function About() {
+function About() {  
   return (
     <div>
       This is About
